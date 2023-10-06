@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{profile_user.username}} profile{% endblock %}
+
+{% block content %}
+<p>{{profile_user.username}}</p>
+<p>{{profile_user.get_full_name}}</p>
+{% if github_url %}
+<p>
+    <a href="{{github_url}}">{{github_url}}</a>
+</p>
+{% endif %}
+{% if user.id == profile_user.id %}
+<a class="btn btn-secondary" href="{% url 'accounts:update' %}">Edit</a>
+{% endif %}
+{% endblock %}
