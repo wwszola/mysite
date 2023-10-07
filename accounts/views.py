@@ -1,6 +1,6 @@
 from django.views.generic import View, DetailView
-from django.views.generic.detail import SingleObjectTemplateResponseMixin
-from django.views.generic.edit import BaseCreateView
+from django.views.generic.detail import SingleObjectTemplateResponseMixin, SingleObjectMixin
+from django.views.generic.edit import BaseCreateView, DeletionMixin
 
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.forms import UserCreationForm
@@ -65,3 +65,15 @@ class ProfileUpdateView(View):
                 'personal_info_form': personal_info_form,
             }
             return render(request, 'profile_update.html', ctx)
+
+class AccountDeleteView(DeletionMixin, View):
+    success_url = reverse_lazy('home')
+
+    def delete(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return super().delete(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
+    def get_object(self):
+        return self.request.user
