@@ -1,14 +1,30 @@
 from django.views.generic import View, DetailView
-from django.views.generic.edit import FormMixin
+from django.views.generic.detail import SingleObjectTemplateResponseMixin
+from django.views.generic.edit import BaseCreateView
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate, login
+from django.contrib.auth.forms import UserCreationForm
 
 from django.shortcuts import render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseForbidden, HttpResponseRedirect
-from django.http import QueryDict
 
 from .forms import PersonalInfoForm
+
+class RegisterView(SingleObjectTemplateResponseMixin, BaseCreateView):
+    form_class = UserCreationForm
+    success_url = reverse_lazy('home')
+    template_name = 'register.html'
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if self.object:
+            username = request.POST['username']
+            password = request.POST['password1']
+            user = authenticate(request, username = username, password = password)
+            if user:
+                login(request, user)
+        return response
 
 class ProfileDetailView(DetailView):
     model = get_user_model()
