@@ -18,7 +18,10 @@ class ProfileDetailView(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         if self.object:
-            ctx['github_url'] = self.object.github_info.get_profile_url()
+            try:
+                ctx['github_url'] = self.object.github_info.get_profile_url()
+            except self.model.github_info.RelatedObjectDoesNotExist:
+                pass
         return ctx
 
 class ProfileUpdateView(View):
