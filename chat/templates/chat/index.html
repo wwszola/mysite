@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+    {% for message in message_list %}
+        <p>{{ message.author }} {{ message.pub_datetime|time }}: {{ message.content }}</p>
+    {% endfor %}
+{% endblock %}
