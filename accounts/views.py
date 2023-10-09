@@ -13,7 +13,7 @@ from .forms import PersonalInfoForm
 class RegisterView(SingleObjectTemplateResponseMixin, BaseCreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy("home")
-    template_name = "register.html"
+    template_name = "accounts/register.html"
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
@@ -28,7 +28,7 @@ class RegisterView(SingleObjectTemplateResponseMixin, BaseCreateView):
 
 class ProfileDetailView(DetailView):
     model = get_user_model()
-    template_name = "profile.html"
+    template_name = "accounts/profile.html"
     context_object_name = "profile_user"
 
     def get_context_data(self, **kwargs):
@@ -49,7 +49,7 @@ class ProfileUpdateView(View):
             ctx = {
                 "personal_info_form": personal_info_form,
             }
-            return render(request, "profile_update.html", ctx)
+            return render(request, "accounts/profile_update.html", ctx)
         else:
             return HttpResponseForbidden()
 
@@ -65,7 +65,7 @@ class ProfileUpdateView(View):
             ctx = {
                 "personal_info_form": personal_info_form,
             }
-            return render(request, "profile_update.html", ctx)
+            return render(request, "accounts/profile_update.html", ctx)
 
 
 class AccountDeleteView(DeletionMixin, View):
