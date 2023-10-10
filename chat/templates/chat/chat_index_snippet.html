@@ -1,0 +1,24 @@
+{% if message_list %}
+    <div class="container-fluid overflow-auto"
+         style="max-height: 8em;
+                flex-direction: column-reverse">
+        <table class="table-sm">
+            <tbody>
+                {% for message in message_list %}
+                    <tr>
+                        <td style="overflow-wrap: break-word">{{ message.author }}</td>
+                        <td style="white-space: nowrap">{{ message.pub_datetime|date:"D" }} {{ message.pub_datetime|time:"G:i" }}</td>
+                        <td>{{ message.content }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="container-fluid">
+        <form method="post" action="{% url 'chat:post' %}">
+            {% csrf_token %}
+            <input type="text" class="form-control" name="content" autocomplete="off">
+            <input type="submit" hidden value="submit">
+        </form>
+    </div>
+{% endif %}
