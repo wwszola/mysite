@@ -1,35 +1,31 @@
+import json
 from datetime import datetime
 
-from django.urls import reverse_lazy
-from django.views.generic import ListView
-from django.views.generic.edit import CreateView
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.views.generic import View
 
-from .forms import PostMessageForm
 from .models import Message
 
 
-class IndexChatView(ListView):
-    template_name = "chat/index.html"
+class ReadMessagesPartialView(View):
+    def get(self, request, length):
+        message_list = list(Message.objects.order_by("-pub_datetime")[:length])
+        html = render_to_string("chat/read_messages_snippet.html", context={"message_list": message_list})
+        return HttpResponse(html)
 
-    def get_queryset(self):
-        return Message.objects.order_by("-pub_datetime")
 
-
-class PostMessageView(CreateView):
-    form_class = PostMessageForm
-    template_name = "chat/post.html"
-    success_url = reverse_lazy("chat:index")
-
-    def post(self, request, *args, **kwargs):
-        self.object = None
-        form = self.get_form()
-        if form.is_valid():
-            message = form.instance
-            if request.user.is_authenticated:
-                message.user_author = request.user
-            else:
-                guest_no = int(datetime.now().strftime("%Y%m%d%H%M%S"))
-                message.guest_author = f"guest{guest_no}"
-            return self.form_valid(form)
+class PostMessageView(View):
+    def post(self, request):
+        body = json.loads(request.body)
+        content = body.get("content", None)
+        if content is None or len(content) == 0:
+            return HttpResponse("no content", status=400)
+        message = Message(content=content)
+        if request.user.is_authenticated:
+            message.user_author = request.user
         else:
-            return self.form_invalid()
+            guest_no = int(datetime.now().strftime("%Y%m%d%H%M%S"))
+            message.guest_author = f"guest{guest_no}"
+        message.save()
+        return HttpResponse(status=201)

@@ -1,0 +1,38 @@
+<div class="container">
+    <div id="read_messages">{% include "chat/read_messages_snippet.html" %}</div>
+    <div id="chat_input">{% include "chat/chat_input_snippet.html" %}</div>
+</div>
+<script>
+    function getCookie(name) {
+        let cookie = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+        return cookie ? cookie[2] : null;
+    }
+    const csrftoken = getCookie('csrftoken');
+    function refreshChat(){
+        let read_messages_div = document.getElementById("read_messages");
+        fetch("{% url 'chat:read' 10 %}", {
+            method: "GET"
+        }).then(response => response.text())
+        .then(html => read_messages_div.innerHTML = html);
+    }
+    function autoRefreshChat(){
+        refreshChat();
+        setTimeout(autoRefreshChat, 15000);
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+        autoRefreshChat();
+    });
+    document.getElementById("post_message").addEventListener("submit", (event) => {
+        event.preventDefault();
+        let message_content = document.getElementById("message_content").value;
+        fetch("{% url 'chat:post' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrftoken
+            },
+            body: JSON.stringify({
+                content: message_content
+            })
+        }).then(response => refreshChat());
+    });
+</script>

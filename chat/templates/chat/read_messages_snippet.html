@@ -14,11 +14,4 @@
             </tbody>
         </table>
     </div>
-    <div class="container-fluid">
-        <form method="post" action="{% url 'chat:post' %}">
-            {% csrf_token %}
-            <input type="text" class="form-control" name="content" autocomplete="off">
-            <input type="submit" hidden value="submit">
-        </form>
-    </div>
 {% endif %}

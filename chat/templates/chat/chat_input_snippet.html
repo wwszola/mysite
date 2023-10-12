@@ -1,0 +1,11 @@
+<div class="container-fluid">
+    <form id="post_message" method="post" action="">
+        {% csrf_token %}
+        <input id="message_content"
+               type="text"
+               class="form-control"
+               name="content"
+               autocomplete="off">
+        <input type="submit" hidden value="submit">
+    </form>
+</div>
