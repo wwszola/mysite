@@ -28,7 +28,8 @@
         fetch("{% url 'chat:post' %}", {
             method: "POST",
             headers: {
-                "X-CSRFToken": csrftoken
+                "X-CSRFToken": csrftoken,
+                "X-Requested-With": "XMLHttpRequest"
             },
             body: JSON.stringify({
                 content: message_content

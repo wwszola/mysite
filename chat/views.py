@@ -17,8 +17,12 @@ class ReadMessagesPartialView(View):
 
 class PostMessageView(View):
     def post(self, request):
-        body = json.loads(request.body)
-        content = body.get("content", None)
+        is_request_ajax = request.headers.get("X-Requested-With", None) == "XMLHttpRequest"
+        if is_request_ajax:
+            body = json.loads(request.body)
+            content = body.get("content", None)
+        else:
+            content = request.POST.get("content", None)
         if content is None or len(content) == 0:
             return HttpResponse("no content", status=400)
         message = Message(content=content)
