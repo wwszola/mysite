@@ -7,8 +7,10 @@ from .models import Room
 class CreateRoomForm(forms.ModelForm):
     class Meta:
         model = Room
-        exclude = ["admin_user"]
-        widgets = {"password": forms.PasswordInput()}
+        exclude = ["allowed_users"]
+        widgets = {
+            "password": forms.PasswordInput(),
+        }
 
     def clean_password(self):
         raw_password = self.cleaned_data.get("password", None)
@@ -17,3 +19,7 @@ class CreateRoomForm(forms.ModelForm):
         else:
             encoded = hashers.make_password(raw_password)
             return encoded
+
+
+class EnterRoomForm(forms.Form):
+    password = forms.CharField(widget=forms.PasswordInput())
