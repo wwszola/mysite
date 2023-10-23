@@ -1,14 +1,31 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, hashers
 from django.db import models
+from django.urls import reverse
 
 
 class Room(models.Model):
     name = models.CharField(max_length=128)
     password = models.CharField(max_length=256, blank=True)
     capacity = models.IntegerField(default=4)
+    allowed_users = models.ManyToManyField(get_user_model())
+
+    def seats_taken(self):
+        return Task.objects.filter(room=self).count()
 
     def is_full(self):
-        return Task.objects.filter(room=self).count() >= self.capacity
+        return self.seats_taken() >= self.capacity
+
+    def get_absolute_url(self):
+        return reverse("clickergame:play", kwargs={"pk": self.pk})
+
+    def check_password(self, provided_password):
+        return hashers.check_password(provided_password, self.password)
+
+    def is_user_allowed(self, user):
+        return self.allowed_users.contains(user)
+
+    def allow_user(self, user):
+        self.allowed_users.add(user)
 
 
 class Task(models.Model):
