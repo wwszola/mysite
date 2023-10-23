@@ -1,11 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
     {% load crispy_forms_tags %}
-    <form class="form-horizontal"
-          method="post"
-          action="{% url 'clickergame:create' %}">
+    <form method="post" action="{% url 'clickergame:create' %}">
         {% csrf_token %}
         {{ form|crispy }}
-        <input class="btn btn-primary" type="submit" value="Create">
+        <input type="submit" value="Create">
     </form>
 {% endblock %}

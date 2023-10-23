@@ -9,6 +9,6 @@
         </p>
     {% endif %}
     {% if user.id == profile_user.id %}
-        <a class="btn btn-secondary" href="{% url 'accounts:update' %}">Edit</a>
+        <a href="{% url 'accounts:update' %}">Edit</a>
     {% endif %}
 {% endblock %}

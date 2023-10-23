@@ -8,11 +8,11 @@
     <form method="post" action="{% url 'accounts:update' %}">
         {% csrf_token %}
         {{ personal_info_form|crispy }}
-        <input class="btn btn-primary" type="submit" value="Save">
+        <input type="submit" value="Save">
         <input type="hidden" name="pk" value="{{ user.id }}">
     </form>
     {% csrf_token %}
     <form method="post" action="{% url 'accounts:delete' %}">
-        <input class="btn btn-danger" type="submit" value="Delete my account">
+        <input type="submit" value="Delete my account">
     </form>
 {% endblock %}

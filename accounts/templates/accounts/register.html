@@ -2,15 +2,13 @@
 {% block title %}Register{% endblock %}
 {% block content %}
     {% load crispy_forms_tags %}
-    <form class="form-horizontal"
-          method="post"
-          action="{% url 'accounts:register' %}">
+    <form method="post" action="{% url 'accounts:register' %}">
         {% csrf_token %}
         {{ form|crispy }}
-        <input class="btn btn-primary" type="submit" value="Create new account">
+        <input type="submit" value="Create new account">
     </form>
-    <p class="lead">
+    <p>
         Already have an account?
-        <a class="link-info" href="{% url 'accounts:login' %}">Login here.</a>
+        <a href="{% url 'accounts:login' %}">Login here.</a>
     </p>
 {% endblock %}
