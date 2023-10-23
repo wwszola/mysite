@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts.apps.AccountsConfig",
     "chat.apps.ChatConfig",
+    "clickergame.apps.ClickerGameConfig",
     "crispy_forms",
     "crispy_bootstrap5",
 ]
