@@ -7,7 +7,6 @@ class Room(models.Model):
     name = models.CharField(max_length=128)
     password = models.CharField(max_length=256, blank=True)
     capacity = models.IntegerField(default=4)
-    allowed_users = models.ManyToManyField(get_user_model())
 
     def seats_taken(self):
         return Task.objects.filter(room=self).count()
@@ -20,12 +19,6 @@ class Room(models.Model):
 
     def check_password(self, provided_password):
         return hashers.check_password(provided_password, self.password)
-
-    def is_user_allowed(self, user):
-        return self.allowed_users.contains(user)
-
-    def allow_user(self, user):
-        self.allowed_users.add(user)
 
 
 class Task(models.Model):

@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseBadRequest
 from django.shortcuts import HttpResponseRedirect, get_object_or_404
 from django.urls import reverse
 from django.views.generic.base import TemplateResponseMixin, View
@@ -10,61 +10,80 @@ from .forms import CreateRoomForm, EnterRoomForm
 from .models import Room
 
 
-class PlayView(DetailView):
+class RoomAccessMixin:
+    def get_room_pk(self):
+        if hasattr(self, "object") and self.object:
+            return self.object.pk
+        return self.kwargs.get("pk")
+
+    def grant_room_access(self):
+        pk = self.get_room_pk()
+        entered_rooms = self.request.session.setdefault("entered_rooms", list())
+        if pk not in entered_rooms:
+            entered_rooms.append(pk)
+            self.request.session.modified = True
+
+    def has_room_access(self):
+        entered_rooms = self.request.session.setdefault("entered_rooms", list())
+        return self.get_room_pk() in entered_rooms
+
+
+class PlayView(RoomAccessMixin, DetailView):
     model = Room
     context_object_name = "room"
     template_name = "clickergame/play.html"
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.object.check_password("") and not self.has_room_access():
+            return HttpResponseRedirect(reverse("clickergame:enter", kwargs={"pk": self.get_room_pk()}))
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
 
-class CreateRoomView(LoginRequiredMixin, CreateView):
+
+class CreateRoomView(RoomAccessMixin, LoginRequiredMixin, CreateView):
     raise_exception = True
     form_class = CreateRoomForm
     template_name = "clickergame/create_room.html"
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.grant_room_access()
+        return response
 
-class EnterRoomView(FormMixin, TemplateResponseMixin, View):
+
+class EnterRoomView(RoomAccessMixin, FormMixin, TemplateResponseMixin, View):
     form_class = EnterRoomForm
     template_name = "clickergame/enter_room.html"
 
     def get_success_url(self):
-        return reverse("clickergame:play", kwargs={"pk": self.object.id})
+        return reverse("clickergame:play", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
         return super().form_valid(form)
 
     def get_object(self):
         pk = self.kwargs.get("pk")
-        return get_object_or_404(Room, id=pk)
+        return get_object_or_404(Room, pk=pk)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["pk"] = self.object.id
+        context["pk"] = self.object.pk
         return context
-
-    def dispatch(self, request, *args, **kwargs):
-        # this only temporary, allow for anonymous/guest users after a Person model has been implemented
-        if self.request.user.is_anonymous:
-            return HttpResponseForbidden()
-        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.password == "":
-            self.object.allow_user(request.user)
+        if self.object.check_password("") or self.has_room_access():
             return HttpResponseRedirect(self.get_success_url())
-        if self.object.is_user_allowed(request.user):
-            return HttpResponseRedirect(self.get_success_url())
-
         return self.render_to_response(self.get_context_data())
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.password == "":
-            self.object.allow_user(request.user)
-            return HttpResponseRedirect(self.get_success_url())
+        if self.object.check_password(""):
+            return HttpResponseBadRequest(f"Room {self.object.name} may be entered without a password")
         form = self.get_form()
         if form.is_valid():
-            self.object.allow_user(request.user)
+            self.grant_room_access()
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
