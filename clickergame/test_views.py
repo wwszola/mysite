@@ -36,5 +36,9 @@ class EnterViewTests(TransactionTestCase):
         room = Room.objects.create(name="test room", password="password")
         enter_url = reverse("clickergame:enter", kwargs={"pk": room.pk})
         response = self.client.post(enter_url, data={"password": "wrongpassword"})
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        expected_error = form.get_incorrect_password_error()
+        error_msg = expected_error.message % expected_error.params
+        self.assertFormError(form=form, field="password", errors=error_msg)
         room.delete()

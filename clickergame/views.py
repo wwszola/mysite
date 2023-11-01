@@ -82,6 +82,7 @@ class EnterRoomView(RoomAccessMixin, FormMixin, TemplateResponseMixin, View):
         if self.object.check_password(""):
             return HttpResponseBadRequest(f"Room {self.object.name} may be entered without a password")
         form = self.get_form()
+        form.requested_room = self.object
         if form.is_valid():
             self.grant_room_access()
             return self.form_valid(form)
