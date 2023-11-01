@@ -3,10 +3,21 @@ from django.db import models
 from django.urls import reverse
 
 
+class RoomManager(models.Manager):
+    def create(self, **kwargs):
+        if "password" in kwargs:
+            raw_password = kwargs["password"]
+            encoded_password = hashers.make_password(raw_password)
+            kwargs["password"] = encoded_password
+        return super().create(**kwargs)
+
+
 class Room(models.Model):
     name = models.CharField(max_length=128)
     password = models.CharField(max_length=256, blank=True)
     capacity = models.IntegerField(default=4)
+
+    objects = RoomManager()
 
     def seats_taken(self):
         return Task.objects.filter(room=self).count()
