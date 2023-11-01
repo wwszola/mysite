@@ -23,6 +23,15 @@ class PlayViewTests(TransactionTestCase):
 
 
 class EnterViewTests(TransactionTestCase):
+    def test_no_password_room_redirects(self):
+        room = Room.objects.create(name="test room", password="")
+        enter_url = reverse("clickergame:enter", kwargs={"pk": room.pk})
+        response = self.client.get(enter_url)
+        self.assertEqual(response.status_code, 302)
+        play_url = reverse("clickergame:play", kwargs={"pk": room.pk})
+        self.assertURLEqual(response.url, play_url)
+        room.delete()
+
     def test_password_protected_room_correct_password(self):
         room = Room.objects.create(name="test room", password="password")
         enter_url = reverse("clickergame:enter", kwargs={"pk": room.pk})
