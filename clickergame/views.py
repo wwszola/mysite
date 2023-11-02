@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseBadRequest
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import HttpResponseRedirect, get_object_or_404
 from django.urls import reverse
 from django.views.generic.base import TemplateResponseMixin, View
@@ -7,7 +10,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormMixin
 
 from .forms import CreateRoomForm, EnterRoomForm
-from .models import Room
+from .models import Room, Task
 
 
 class RoomAccessMixin:
@@ -90,3 +93,20 @@ class EnterRoomView(RoomAccessMixin, FormMixin, TemplateResponseMixin, View):
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
+
+
+class JoinRoomView(RoomAccessMixin, View):
+    def get_object(self):
+        pk = self.kwargs.get("pk")
+        return get_object_or_404(Room, pk=pk)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or not self.has_room_access():
+            raise PermissionDenied()
+        self.object = self.get_object()
+        if self.object.is_full():
+            raise HttpResponseForbidden(f"The room {self.object.name} that you're trying to join is full")
+        task = Task.objects.create(room=self.object, worker=user, last_update=datetime.now())
+        task.save()
+        return HttpResponseRedirect(self.object.get_absolute_url())
