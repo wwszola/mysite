@@ -24,8 +24,10 @@ class RoomAccessMixin:
             self.request.session.modified = True
 
     def has_room_access(self):
+        pk = self.get_room_pk()
+        room = Room.objects.get(pk=pk)
         entered_rooms = self.request.session.setdefault("entered_rooms", list())
-        return self.get_room_pk() in entered_rooms
+        return pk in entered_rooms or room.is_not_password_protected
 
 
 class PlayView(RoomAccessMixin, DetailView):
@@ -35,7 +37,7 @@ class PlayView(RoomAccessMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if not self.object.check_password("") and not self.has_room_access():
+        if not self.has_room_access():
             return HttpResponseRedirect(reverse("clickergame:enter", kwargs={"pk": self.get_room_pk()}))
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
@@ -73,13 +75,13 @@ class EnterRoomView(RoomAccessMixin, FormMixin, TemplateResponseMixin, View):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.check_password("") or self.has_room_access():
+        if self.has_room_access():
             return HttpResponseRedirect(self.get_success_url())
         return self.render_to_response(self.get_context_data())
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.check_password(""):
+        if not self.object.is_password_protected:
             return HttpResponseBadRequest(f"Room {self.object.name} may be entered without a password")
         form = self.get_form()
         form.requested_room = self.object
