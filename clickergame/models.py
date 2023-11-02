@@ -3,21 +3,14 @@ from django.db import models
 from django.urls import reverse
 
 
-class RoomManager(models.Manager):
-    def create(self, **kwargs):
-        if "password" in kwargs:
-            raw_password = kwargs["password"]
-            encoded_password = hashers.make_password(raw_password)
-            kwargs["password"] = encoded_password
-        return super().create(**kwargs)
-
-
 class Room(models.Model):
     name = models.CharField(max_length=128)
     password = models.CharField(max_length=256, blank=True)
     capacity = models.IntegerField(default=4)
 
-    objects = RoomManager()
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.password = hashers.make_password(self.password)
+        return super().save(force_insert, force_update, using, update_fields)
 
     def seats_taken(self):
         return Task.objects.filter(room=self).count()
@@ -38,6 +31,9 @@ class Task(models.Model):
     goal = models.IntegerField(default=100)
     progress = models.IntegerField(blank=True, default=0)
     last_update = models.DateTimeField(blank=True)
+
+    def __str__(self):
+        return f"{self.worker.username}'s task in room {self.room.name} {self.progress}/{self.goal}"
 
     def advance(self, increment, updated):
         if updated < self.last_update:
