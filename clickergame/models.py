@@ -21,6 +21,10 @@ class Room(models.Model):
     def get_absolute_url(self):
         return reverse("clickergame:play", kwargs={"pk": self.pk})
 
+    @property
+    def is_password_protected(self):
+        return not self.check_password("")
+
     def check_password(self, provided_password):
         return hashers.check_password(provided_password, self.password)
 
