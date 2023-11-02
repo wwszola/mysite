@@ -2,4 +2,9 @@
 {% block content %}
     <h1>{{ room.name }}</h1>
     <h2>{{ room.seats_taken }}/{{ room.capacity }}</h2>
+    <form method="post" action="{% url 'clickergame:join' room.pk %}">
+        {% csrf_token %}
+        <input type="submit" value="Join">
+    </form>
+    {% for task in room.task_set.all %}<p>{{ task }}</p>{% endfor %}
 {% endblock %}
