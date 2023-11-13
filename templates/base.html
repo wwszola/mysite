@@ -10,7 +10,7 @@
         <link rel="stylesheet" href="{% static 'base.css' %}">
     </head>
     <body>
-        <nav>
+        <nav id="topnav">
             <a href="{% url 'home' %}">Home</a>
             <a href="{% url 'clickergame:create' %}">New Game</a>
             {% if user.is_authenticated %}
@@ -21,7 +21,11 @@
                 <a href="{% url 'accounts:register' %}">Register</a>
             {% endif %}
         </nav>
-        {% block content %}{% endblock %}
-        {% include "chat/chat.html" %}
+        <div id="main">
+            <div id="sidebar">{% include "chat/chat.html" %}</div>
+            <div id="content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
     </body>
 </html>

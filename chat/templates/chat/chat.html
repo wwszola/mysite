@@ -1,5 +1,7 @@
-<div id="read_messages">{% include "chat/read_messages_snippet.html" %}</div>
-<div id="chat_input">{% include "chat/chat_input_snippet.html" %}</div>
+<div id="chat_container">
+    <div id="read_messages">{% include "chat/read_messages_snippet.html" %}</div>
+    <div id="chat_input">{% include "chat/chat_input_snippet.html" %}</div>
+</div>
 <script>
     function getCookie(name) {
         let cookie = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');

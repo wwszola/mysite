@@ -1,13 +1,5 @@
-<div style="max-height: 8em; flex-direction: column-reverse">
-    <table>
-        <tbody>
-            {% for message in message_list %}
-                <tr>
-                    <td style="overflow-wrap: break-word">{{ message.author }}</td>
-                    <td style="white-space: nowrap">{{ message.pub_datetime|date:"D" }} {{ message.pub_datetime|time:"G:i" }}</td>
-                    <td>{{ message.content }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+{% for message in message_list %}
+    <p>
+        {{ message.pub_datetime|date:"D" }} {{ message.pub_datetime|time:"G:i" }} {{ message.author }} {{ message.content }}
+    </p>
+{% endfor %}
