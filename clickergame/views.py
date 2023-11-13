@@ -30,7 +30,7 @@ class RoomAccessMixin:
         pk = self.get_room_pk()
         room = Room.objects.get(pk=pk)
         entered_rooms = self.request.session.setdefault("entered_rooms", list())
-        return pk in entered_rooms or room.is_not_password_protected
+        return pk in entered_rooms or not room.is_password_protected
 
 
 class PlayView(RoomAccessMixin, DetailView):
