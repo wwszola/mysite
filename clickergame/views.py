@@ -105,8 +105,10 @@ class JoinRoomView(RoomAccessMixin, View):
         if not user.is_authenticated or not self.has_room_access():
             raise PermissionDenied()
         self.object = self.get_object()
+        if self.object.task_set.filter(worker=user).exists():
+            return HttpResponseForbidden(f"User {user.username} has task assigned in room {self.object.name} already")
         if self.object.is_full():
-            raise HttpResponseForbidden(f"The room {self.object.name} that you're trying to join is full")
+            return HttpResponseForbidden(f"The room {self.object.name} that you're trying to join is full")
         task = Task.objects.create(room=self.object, worker=user, last_update=datetime.now())
         task.save()
         return HttpResponseRedirect(self.object.get_absolute_url())
